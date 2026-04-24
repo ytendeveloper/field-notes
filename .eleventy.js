@@ -55,6 +55,7 @@ module.exports = function (eleventyConfig) {
   // ─── Passthrough copies ────────────────────────────────────
   eleventyConfig.addPassthroughCopy('assets');
   eleventyConfig.addPassthroughCopy('posts/**/images/**');
+  eleventyConfig.addPassthroughCopy('CNAME');
 
   // ─── Collections ───────────────────────────────────────────
   // Oldest-first: collection index + 1 = post number.
@@ -129,7 +130,6 @@ module.exports = function (eleventyConfig) {
       includes: '_includes',
       data: '_data',
     },
-    pathPrefix: '/field-notes/',
     markdownTemplateEngine: 'njk',
     htmlTemplateEngine: 'njk',
     dataTemplateEngine: 'njk',
