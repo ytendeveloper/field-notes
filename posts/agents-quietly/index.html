@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agents, quietly: why the next wave of AI will feel less like a chatbot — Field Notes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/field-notes/assets/design-theme.css">
+<style>
+  /* Base tag-pill style (applied everywhere .cat is used) */
+  .cat {
+    --tag-color: var(--ink);
+    display: inline-block;
+    background: var(--paper);
+    border: 1px solid var(--tag-color);
+    color: var(--tag-color);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  /* Data-driven per-tag colors (see _data/tagStyles.json) */
+  
+  .cat[data-tag="AI"] { --tag-color: var(--accent); }
+  
+  .cat[data-tag="Agents"] { --tag-color: #8a5a2b; }
+  
+  .cat[data-tag="RAG"] { --tag-color: #6b4f8a; }
+  
+  .cat[data-tag="Tools"] { --tag-color: var(--blue); }
+  
+  .cat[data-tag="Craft"] { --tag-color: #3d7a4a; }
+  
+  .cat[data-tag="Essay"] { --tag-color: var(--ink); }
+  
+  .cat[data-tag="Notebook"] { --tag-color: var(--muted); }
+  
+</style>
+
+<style>
+  /* ══════════ Layout ══════════ */
+  .page {
+    max-width: 920px; margin: 0 auto;
+    padding: 48px 32px 120px;
+    position: relative;
+  }
+
+  /* ══════════ Masthead ══════════ */
+  .mast {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px;
+    border-bottom: 1.5px solid var(--line-strong);
+    margin-bottom: 40px;
+  }
+  .mast__brand { display: flex; align-items: flex-end; gap: 14px; }
+  .mast__anchor { font-size: 32px; line-height: 1; color: var(--accent); }
+  .mast__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 42px; line-height: 1; letter-spacing: -1px; color: var(--ink);
+  }
+  .mast__sub {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .mast__nav { display: flex; align-items: center; gap: 8px; }
+  .mast__nav a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 8px 12px; text-decoration: none; border-radius: 4px;
+  }
+  .mast__nav a:hover { background: rgba(26,26,26,0.06); }
+  .mast__nav a.is-active { background: var(--ink); color: var(--paper); }
+  .mast__nav__sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
+
+  /* ══════════ Back link ══════════ */
+  .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase; text-decoration: none;
+    margin-bottom: 28px;
+  }
+  .back:hover { color: var(--accent); }
+  .back::before { content: '←'; font-family: var(--font-display); font-size: 16px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ══════════ Hero ══════════ */
+  .hero { margin-bottom: 40px; }
+  .hero .tags { margin-bottom: 18px; }
+  .hero__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 52px; line-height: 1.05; letter-spacing: -1.5px;
+    color: var(--accent);
+    margin: 0 0 18px; text-wrap: balance;
+  }
+  .hero__deck {
+    font-family: var(--font-display); font-size: 20px; line-height: 1.4;
+    color: var(--ink); margin: 0 0 22px;
+    max-width: 58ch; text-wrap: pretty;
+    opacity: 0.9;
+  }
+  .hero__meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line-dashed);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .hero__meta__sep { opacity: 0.5; }
+
+  /* ══════════ Two-column: prose + sidebar ══════════ */
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ══════════ Prose ══════════ */
+  .prose {
+    font-family: var(--font-display);
+    font-size: 18px; line-height: 1.65; color: var(--ink);
+    max-width: 62ch;
+  }
+  .prose > :first-child { margin-top: 0; }
+  .prose > :last-child  { margin-bottom: 0; }
+  .prose p { margin: 0 0 1.2em; text-wrap: pretty; }
+  .prose h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.4px;
+    color: var(--ink);
+    margin: 2em 0 0.5em;
+    position: relative;
+    padding-left: 0;
+  }
+  .prose h2::before {
+    content: counter(h2-count, decimal-leading-zero);
+    counter-increment: h2-count;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .prose { counter-reset: h2-count; }
+  .prose h3 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 20px; line-height: 1.2;
+    color: var(--ink);
+    margin: 1.8em 0 0.4em;
+  }
+  .prose a {
+    color: var(--blue); text-decoration: underline dotted;
+    text-underline-offset: 4px;
+  }
+  .prose a:hover { color: var(--accent); text-decoration-style: solid; }
+  .prose strong { font-weight: 700; color: var(--ink); }
+  .prose em { font-style: italic; }
+  .prose code {
+    font-family: var(--font-mono); font-size: 0.92em;
+    background: rgba(26,26,26,0.06);
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--ink);
+  }
+  .prose pre {
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.55;
+    background: var(--ink); color: var(--paper);
+    padding: 18px 20px; border-radius: var(--r-md);
+    margin: 1.5em 0; overflow-x: auto;
+    white-space: pre;
+  }
+  .prose pre code { background: transparent; padding: 0; color: inherit; }
+  .prose ul, .prose ol { margin: 0 0 1.2em; padding-left: 1.4em; }
+  .prose ul li { list-style: none; position: relative; }
+  .prose ul li::before {
+    content: '·'; position: absolute; left: -1em;
+    color: var(--accent); font-weight: 700; font-size: 1.5em; line-height: 1;
+  }
+  .prose ol li { padding-left: 4px; }
+  .prose li { margin-bottom: 0.4em; }
+
+  /* Drop cap on first paragraph */
+  .prose > p:first-of-type::first-letter {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 64px; line-height: 0.85;
+    float: left; color: var(--accent);
+    padding: 8px 10px 0 0;
+    margin-top: 4px;
+  }
+
+  /* Pull-quote */
+  .prose .pull {
+    border-left: 3px solid var(--accent);
+    padding: 6px 0 6px 20px;
+    margin: 1.8em 0;
+    font-family: var(--font-script);
+    font-weight: 400;
+    font-size: 26px; line-height: 1.3; color: var(--ink);
+    max-width: 50ch;
+  }
+  /* markdown-it wraps ::: pull body in <p> — kill its margin */
+  .prose .pull p { margin: 0; }
+
+  /* Figure */
+  .prose figure {
+    margin: 2em 0; padding: 0;
+  }
+  .prose figure img {
+    display: block;
+    width: 100%;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--line);
+  }
+  .prose figure .ph {
+    background: var(--cool);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--r-md);
+    aspect-ratio: 16 / 9;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .prose figcaption {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.2px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 10px; padding-left: 12px;
+    border-left: 2px solid var(--line-soft);
+  }
+
+  /* Callout box */
+  .callout {
+    background: var(--warm);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    margin: 1.8em 0;
+    font-size: 16px;
+  }
+  .callout__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout p { margin: 0; }
+  .callout p + p { margin-top: 0.6em; }
+
+  /* ══════════ TOC sidebar ══════════ */
+  .toc {
+    position: sticky; top: 40px;
+    border-left: 1.5px solid var(--line);
+    padding: 4px 0 4px 18px;
+  }
+  .toc__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .toc ol {
+    list-style: none; padding: 0; margin: 0;
+    counter-reset: toc;
+  }
+  .toc li { margin-bottom: 10px; counter-increment: toc; }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.3px;
+    color: var(--muted);
+    margin-right: 8px;
+  }
+  .toc a {
+    font-family: var(--font-display); font-size: 14px; line-height: 1.25;
+    color: var(--ink); text-decoration: none;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc__read {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px dashed var(--line-dashed);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.3px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .toc__read b { font-weight: 400; color: var(--accent); }
+  .toc__progress {
+    height: 3px; background: var(--line-soft); border-radius: 2px;
+    margin-top: 8px; overflow: hidden;
+  }
+  .toc__progress__fill {
+    height: 100%; background: var(--accent); width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ══════════ End-of-post ══════════ */
+  .endmark {
+    text-align: center;
+    font-family: var(--font-script);
+    font-size: 32px; color: var(--accent);
+    margin: 2.5em 0;
+    letter-spacing: 0.5em;
+  }
+
+  .post-end {
+    margin-top: 48px; padding-top: 28px;
+    border-top: 1px dashed var(--line-dashed);
+  }
+  .post-end__row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 18px; margin-bottom: 14px;
+  }
+  .post-end__stamp {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.3px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .post-end__stamp b { color: var(--ink); font-weight: 400; }
+  .share { display: flex; gap: 6px; align-items: center; }
+  .share__btn {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 6px 12px; border: 1px solid var(--line);
+    border-radius: 4px; background: var(--paper);
+    cursor: pointer; text-decoration: none;
+  }
+  .share__btn:hover { border-color: var(--ink); background: rgba(26,26,26,0.04); }
+  .share__btn--primary {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .share__btn--primary:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ══════════ Prev / Next ══════════ */
+  .nextprev {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-top: 36px;
+  }
+  .nextprev a, .nextprev div.nextprev__stub {
+    display: block; padding: 18px 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--paper);
+    text-decoration: none;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .nextprev a:hover {
+    background: var(--warm);
+    border: 2.2px solid var(--accent);
+    padding: calc(18px - 1.2px) calc(20px - 1.2px);
+  }
+  .nextprev div.nextprev__stub { opacity: 0.6; }
+  .nextprev__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .nextprev__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 18px; line-height: 1.2; color: var(--ink);
+  }
+  .nextprev a:hover .nextprev__title { color: var(--accent); }
+  .nextprev__next { text-align: right; }
+
+  /* ══════════ Footer ══════════ */
+  .ftr {
+    margin-top: 48px; padding-top: 22px;
+    border-top: 1px dashed var(--line-dashed);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .ftr a { color: var(--blue); text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* ══════════ Responsive ══════════ */
+  @media (max-width: 820px) {
+    .body { grid-template-columns: 1fr; gap: 0; }
+    .toc {
+      position: static;
+      border-left: 0;
+      border-top: 1px dashed var(--line-dashed);
+      border-bottom: 1px dashed var(--line-dashed);
+      margin-top: 20px;
+      padding: 16px 0 18px;
+    }
+    .toc ol {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .page { padding: 24px 16px 100px; }
+    .mast {
+      flex-direction: column; align-items: flex-start; gap: 14px;
+      padding-bottom: 16px; margin-bottom: 24px;
+    }
+    .mast__title { font-size: 32px; }
+    .mast__anchor { font-size: 26px; }
+    .mast__nav { flex-wrap: wrap; gap: 4px; }
+    .mast__nav a { padding: 6px 9px; font-size: 10px; }
+    .mast__nav__sep { display: none; }
+
+    .hero__title { font-size: 34px; letter-spacing: -1px; }
+    .hero__deck  { font-size: 17px; }
+    .hero__meta  { font-size: 10px; gap: 10px; }
+
+    .prose { font-size: 17px; }
+    .prose h2 { font-size: 22px; }
+    .prose h3 { font-size: 18px; }
+    .prose > p:first-of-type::first-letter { font-size: 48px; padding: 6px 8px 0 0; }
+    .prose .pull { font-size: 22px; padding-left: 14px; }
+
+    .nextprev { grid-template-columns: 1fr; }
+    .toc ol { grid-template-columns: 1fr; }
+  }
+</style>
+
+</head>
+<body>
+
+
+
+
+
+
+
+<main class="page">
+
+  <!-- Masthead -->
+  <header class="mast">
+    <div>
+      <div class="mast__brand">
+        <span class="mast__anchor">✎</span>
+        <h1 class="mast__title">Field Notes</h1>
+      </div>
+      <div class="mast__sub">Slow thoughts on technology, AI, and the craft</div>
+    </div>
+    <nav class="mast__nav">
+      <a href="/field-notes/">Latest</a>
+      <span class="mast__nav__sep"></span>
+      <a href="#">AI</a><a href="#">Tools</a><a href="#">Craft</a><a href="#">Misc.</a>
+    </nav>
+  </header>
+
+  <!-- Back link -->
+  <a href="/field-notes/" class="back">All notes</a>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="tags">
+      <span class="cat" data-tag="AI">AI</span><span class="cat" data-tag="Agents">Agents</span><span class="cat" data-tag="Essay">Essay</span>
+    </div>
+
+    <h1 class="hero__title">Agents, quietly: why the next wave of AI will feel less like a chatbot</h1>
+
+    <p class="hero__deck">Most &#39;agentic&#39; demos are still framed as a conversation that happens to call tools. But the interesting work is invisible — models that plan, retry, and narrate progress as a first-class citizen of the UI.</p>
+
+    <div class="hero__meta">
+      <span>April 22, 2026</span>
+      <span class="hero__meta__sep">·</span>
+      <span>5 min read</span>
+      <span class="hero__meta__sep">·</span>
+      <span>~942 words</span>
+      <span class="hero__meta__sep">·</span>
+      <span>No. 1</span>
+    </div>
+  </div>
+
+  <!-- Body + TOC -->
+  <div class="body">
+    <article class="prose">
+      <p>The most persistent assumption in agent demos — the one that keeps showing up even in otherwise careful work — is that the interface to the agent is <em>the conversation</em>. You type, it types. You watch a progress indicator and a stream of messages. The model’s reasoning, such as it is, is laid bare as a scrollable log. It’s a strange bit of skeuomorphism: we’ve taken the one novel capability of language models — that they can genuinely operate on the world rather than just describe it — and stapled it into the UI pattern we invented for IRC.</p>
+<p>The interesting agents, the ones I actually want to live with, feel much closer to a good colleague than a good chatbot. They disappear. They produce a result. When something is wrong you can page through what they did, but you don’t have to read the play-by-play.</p>
+<blockquote class="pull">
+<p>“The best agents are the ones you stop noticing — they disappear into the work.”</p>
+</blockquote>
+<h2 id="s1">The conversation is not the product</h2>
+<p>I’ve been running a small, dumb experiment on myself for about six months. Every time I reach for a chat-style AI tool, I ask: is the conversation actually the thing I need? Or is it a ladder I’m using to get to a document, a piece of code, a schedule, a decision? More often than not, the conversation is the ladder — and the ladder is in the way.</p>
+<p>The easiest way to see this is to watch a non-technical person use any current agentic tool. They open the chat. They ask a question. The model replies with a wall of text that includes the answer and four paragraphs of caveats and three unrequested next steps. The person either scrolls past it or closes the tab. Almost nobody reads the whole reply. The reply is not the product. It was never the product. It was just the only interface we knew how to build.</p>
+<div class="callout">
+<div class="callout__lbl">Aside</div>
+<p>This isn’t a criticism of chat as a <em>primitive</em> — it’s a criticism of chat as a <em>default</em>. A chat is a fine way to specify intent. It’s a terrible way to deliver a result.</p>
+</div>
+<h2 id="s2">What ambient agents look like</h2>
+<p>An “ambient” agent, the way I’m using the term, is one that is doing work <em>adjacent to</em> my normal tools — not inside a separate chat surface. Three patterns I’ve been trying in my own projects:</p>
+<ul>
+<li><strong>Margin annotations.</strong> The agent’s output appears <em>near</em> the thing it’s acting on, not in a separate conversation. In an editor: a suggested rename hovers over the symbol, not in a sidebar.</li>
+<li><strong>Latent progress.</strong> The agent narrates what it’s doing in a single line of status — not a stream of reasoning tokens. If I want the play-by-play I open a drawer; I never have to.</li>
+<li><strong>Reversible outputs.</strong> Whatever the agent produces is easy to undo, easy to compare against what was there before, and easy to nudge. The UI for <em>editing the agent’s work</em> is the main UI. The UI for <em>asking the agent to work</em> is tiny.</li>
+</ul>
+<figure>
+<div class="ph">fig 1 · margin-annotation sketch</div>
+<figcaption>A rough sketch of the "suggestion floats next to the thing" pattern.</figcaption>
+</figure>
+<h2 id="s3">A small concrete example</h2>
+<p>I’ve been rebuilding a personal CRM around this principle. The old version was a chat interface to my contacts: “Hey, what’s going on with Rita?” The new version is a timeline, and the agent’s output appears as inline little cards in the timeline — a “suggested follow-up” that I either tap to accept or swipe to dismiss.</p>
+<p>The functionality is identical. I can still ask “what’s going on with Rita?” — there’s a command palette. But I almost never do, because by the time I’ve thought of the question, the answer is already sitting in her row, waiting for me.</p>
+<pre><code class="language-ts">// a suggestion is just a row in the timeline
+type Suggestion = {
+  subjectId: string;
+  kind: 'follow_up' | 'note' | 'reminder';
+  body: string;           // &lt; 80 chars
+  rationale?: string;     // shown on long-press
+  createdAt: Date;
+};
+</code></pre>
+<p>The <code>rationale</code> field is the whole bit. The agent has reasons; it will happily show them to you; you never have to look at them unless something feels wrong. This is, I think, the minimum viable contract for ambient agents: <strong>the reasoning is available, but not mandatory</strong>.</p>
+<h2 id="s4">Where chat still wins</h2>
+<p>None of this is to say chat is dead — it isn’t, obviously. Chat is unmatched for <em>open-ended specification</em>: when I don’t yet know what I want, when the shape of the answer is itself up for grabs, when I’m going to iterate by rephrasing. Design conversations, brainstorming, therapy-style reflections, debugging — all of these live happily in chat because the thing I’m producing <em>is</em> the conversation.</p>
+<p>The failure mode is treating every task as if it were that task. Most of the things we ask agents to do — send this email, update this row, summarize this meeting, route this ticket — have a <em>crisp result shape</em>. When the result is crisp, the UI should be crisp too. A chat is an indulgence.</p>
+<h2 id="s5">What I’m watching for next</h2>
+<p>The tell, I think, will be when a major product ships an agent without a conversational surface at all — just the results and a one-line status bar. It’ll feel thin at first. Then it’ll feel obvious. Then every chatbox will look like a mistake.</p>
+<p>In the meantime, I’m trying to catch myself every time I reach for a chat interface and ask: is the conversation what I need, or am I using the conversation as a lever to get somewhere else? More often than I’d like to admit, I’m pulling the lever.</p>
+
+    </article>
+
+    
+    <aside class="toc" aria-label="Table of contents">
+      <div class="toc__lbl">In this note</div>
+      <ol>
+        <li><a href="#s1">The conversation is not the product</a></li><li><a href="#s2">What ambient agents look like</a></li><li><a href="#s3">A small concrete example</a></li><li><a href="#s4">Where chat still wins</a></li><li><a href="#s5">What I’m watching for next</a></li>
+      </ol>
+      <div class="toc__read">
+        Reading · <b id="toc-pct">0%</b>
+        <div class="toc__progress"><div class="toc__progress__fill" id="toc-fill"></div></div>
+      </div>
+    </aside>
+    
+  </div>
+
+  <!-- End mark -->
+  <div class="endmark">· · ·</div>
+
+  <!-- End-of-post -->
+  <div class="post-end">
+    <div class="post-end__row">
+      <div class="tags">
+        <span class="cat" data-tag="AI">AI</span><span class="cat" data-tag="Agents">Agents</span><span class="cat" data-tag="Essay">Essay</span>
+      </div>
+      <div class="share">
+        <button class="share__btn" type="button" onclick="navigator.clipboard.writeText(location.href)">Copy link</button>
+        <a href="mailto:?subject=Agents%2C%20quietly%3A%20why%20the%20next%20wave%20of%20AI%20will%20feel%20less%20like%20a%20chatbot&body=https://ytendeveloper.github.io/field-notes/posts/agents-quietly/" class="share__btn">Email</a>
+        
+      </div>
+    </div>
+    <div class="post-end__stamp">
+      Published <b>April 22, 2026</b>
+       · Last edited <b>April 24, 2026</b>
+       · <b>No. 1</b>
+    </div>
+  </div>
+
+  <!-- Prev / Next -->
+  <div class="nextprev">
+    
+    <div class="nextprev__stub">
+      <div class="nextprev__lbl">← Older note</div>
+      <div class="nextprev__title">This is the first note.</div>
+    </div>
+    
+
+    
+    <div class="nextprev__stub nextprev__next">
+      <div class="nextprev__lbl">Newer note →</div>
+      <div class="nextprev__title">Coming soon</div>
+    </div>
+    
+  </div>
+
+  <!-- Footer -->
+  <footer class="ftr">
+    <div>✎ Field Notes · a personal log</div>
+    <div>
+      <a href="/field-notes/">All notes</a>
+      &nbsp;·&nbsp;
+      <a href="#">RSS</a>
+    </div>
+  </footer>
+
+</main>
+
+
+<script>
+  // Reading-progress bar in the TOC
+  (function () {
+    const fill = document.getElementById('toc-fill');
+    const pct  = document.getElementById('toc-pct');
+    const article = document.querySelector('.prose');
+    if (!fill || !article) return;
+
+    function update() {
+      const r = article.getBoundingClientRect();
+      const total = article.offsetHeight;
+      const scrolled = Math.max(0, Math.min(total, -r.top + window.innerHeight * 0.15));
+      const p = Math.round((scrolled / total) * 100);
+      const clamped = Math.max(0, Math.min(100, p));
+      fill.style.width = clamped + '%';
+      pct.textContent = clamped + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+</script>
+
+</body>
+</html>
