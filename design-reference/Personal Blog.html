@@ -1,0 +1,552 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Field Notes — a personal log</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="design-theme.css">
+<style>
+  /* ── Page scaffold ─────────────────────────────────────── */
+  .blog {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+    position: relative;
+  }
+
+  /* ── Masthead ──────────────────────────────────────────── */
+  .mast {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px;
+    border-bottom: 1.5px solid var(--line-strong);
+    margin-bottom: 40px;
+  }
+  .mast__brand {
+    display: flex; align-items: flex-end; gap: 14px;
+  }
+  .mast__anchor { font-size: 32px; line-height: 1; color: var(--accent); }
+  .mast__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 42px; line-height: 1; letter-spacing: -1px;
+    color: var(--ink);
+  }
+  .mast__sub {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .mast__nav {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mast__nav a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 8px 12px; text-decoration: none;
+    border-radius: 4px;
+  }
+  .mast__nav a:hover { background: rgba(26,26,26,0.06); }
+  .mast__nav a.is-active { background: var(--ink); color: var(--paper); }
+  .mast__nav__sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
+
+  /* ── Section line ──────────────────────────────────────── */
+  .section-rule {
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin: 6px 0 20px;
+  }
+  .section-rule::before,
+  .section-rule::after {
+    content: ''; flex: 1; border-top: 1px dashed var(--line-dashed);
+  }
+
+  /* ── Post card ─────────────────────────────────────────── */
+  .post {
+    background: var(--paper);
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-lg);
+    padding: 28px 32px 24px;
+    margin-bottom: 22px;
+    position: relative;
+  }
+  .post { transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
+
+  /* DESKTOP: hover highlights; first post is highlighted when nothing is hovered */
+  @media (hover: hover) and (min-width: 721px) {
+    .post:hover,
+    .blog:not(:has(.post:hover)) .post:first-of-type {
+      background: var(--warm);
+      border: 2.2px solid var(--accent);
+      padding: calc(28px - 0.7px) calc(32px - 0.7px) calc(24px - 0.7px);
+    }
+    .post:hover .post__title,
+    .blog:not(:has(.post:hover)) .post:first-of-type .post__title { color: var(--accent); }
+  }
+
+  /* MOBILE / TOUCH: JS-managed .is-focused carries the highlight */
+  @media (hover: none), (max-width: 720px) {
+    .post.is-focused {
+      background: var(--warm);
+      border: 2.2px solid var(--accent);
+      padding: calc(28px - 0.7px) calc(32px - 0.7px) calc(24px - 0.7px);
+    }
+    .post.is-focused .post__title { color: var(--accent); }
+  }
+
+  .post__meta {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .post__meta__sep { opacity: 0.5; }
+
+  .post__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 30px; line-height: 1.1; letter-spacing: -0.6px;
+    color: var(--ink); margin: 0 0 10px;
+    text-decoration: none; display: inline-block;
+  }
+  .post__title:hover { color: var(--accent); }
+
+  .post__excerpt {
+    font-family: var(--font-display); font-size: 16px; line-height: 1.55;
+    color: var(--ink); margin: 0 0 18px; max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .post__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line-dashed);
+  }
+  .post__author {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display); font-size: 14px; color: var(--muted);
+  }
+  .post__author__avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1.4px solid var(--ink);
+    background: var(--warm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink);
+  }
+  .post__cta {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--accent); text-transform: uppercase; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .post__cta::after { content: '→'; font-family: var(--font-display); font-size: 16px; }
+  .post__cta:hover { text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* ── Featured variant ──────────────────────────────────── */
+  .post--featured {
+    background: var(--warm);
+    border: 2.2px solid var(--accent);
+    padding: 36px 40px 30px;
+  }
+  .post--featured .post__title {
+    font-size: 40px; letter-spacing: -1px; color: var(--accent);
+  }
+  .post--featured .post__title:hover { color: var(--ink); }
+  .post--featured .post__excerpt { font-size: 18px; max-width: 60ch; }
+  .post--featured__banner {
+    position: absolute; top: -12px; left: 28px;
+    background: var(--accent); color: var(--paper);
+    padding: 4px 12px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.8px;
+    text-transform: uppercase;
+  }
+
+  /* ── Pull-quote in featured ────────────────────────────── */
+  .pull {
+    border-left: 3px solid var(--accent);
+    padding: 2px 0 2px 16px;
+    margin: 18px 0 20px;
+    font-family: var(--font-script);
+    font-size: 22px; line-height: 1.25; color: var(--ink);
+    max-width: 50ch;
+  }
+
+  /* ── Category pills (override .badge) ──────────────────── */
+  .cat {
+    display: inline-block; padding: 2px 10px; border-radius: 99px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--paper);
+    border: 1px solid transparent;
+  }
+  /* Personal blog: consistent pill shape; per-tag border + text color
+     driven by --tag-color so hover can swap fg/bg cleanly. */
+  .cat {
+    --tag-color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--tag-color);
+    color: var(--tag-color);
+  }
+  .cat[data-tag="AI"]       { --tag-color: var(--accent); }
+  .cat[data-tag="Agents"]   { --tag-color: #8a5a2b; }   /* umber */
+  .cat[data-tag="RAG"]      { --tag-color: #6b4f8a; }   /* plum */
+  .cat[data-tag="Tools"]    { --tag-color: var(--blue); }
+  .cat[data-tag="Craft"]    { --tag-color: #3d7a4a; }   /* sage */
+  .cat[data-tag="Essay"]    { --tag-color: var(--ink); }
+  .cat[data-tag="Notebook"] { --tag-color: var(--muted); }
+
+  /* Hover/focus: fill pill with its tag color, text flips to paper */
+  .post:hover .cat,
+  .post.is-focused .cat {
+    background: var(--tag-color);
+    color: var(--paper);
+  }
+
+  /* Stack of tag pills — sits at the top of a post, replaces a single category */
+  .post__tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  /* ── Pagination ────────────────────────────────────────── */
+  .pager {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin: 30px 0 18px;
+  }
+  .pager--top { margin: 0 0 34px; }
+  .pager__btn {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 1.4px;
+    color: var(--ink); text-decoration: none; text-transform: uppercase;
+    min-width: 36px; height: 36px; padding: 0 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.2px solid var(--line);
+    border-radius: var(--r-sm); background: var(--paper);
+    cursor: pointer;
+  }
+  .pager__btn:hover { border-color: var(--ink); }
+  .pager__btn.is-current {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .pager__btn.is-disabled { opacity: 0.35; pointer-events: none; }
+  .pager__arrow { padding: 0 14px; gap: 6px; }
+  .pager__dots { font-family: var(--font-mono); color: var(--muted); padding: 0 4px; }
+  .pager__count {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase; text-align: center;
+    margin-bottom: 18px;
+  }
+
+  /* ── Sidebar-ish "Currents" strip (between pager and posts) ─ */
+  .currents {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-bottom: 34px;
+  }
+  .currents__item {
+    border: 1px dashed var(--line-dashed);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    background: var(--paper);
+  }
+  .currents__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .currents__val {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 20px; line-height: 1.15; margin-top: 4px;
+    color: var(--ink);
+  }
+  .currents__val--accent { color: var(--accent); }
+  .currents__val--blue   { color: var(--blue); }
+
+
+  /* ── Footer ────────────────────────────────────────────── */
+  .ftr {
+    margin-top: 48px; padding-top: 22px;
+    border-top: 1px dashed var(--line-dashed);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .ftr a { color: var(--blue); text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .blog { padding: 24px 16px 100px; }
+    .mast {
+      flex-direction: column; align-items: flex-start; gap: 14px;
+      padding-bottom: 16px; margin-bottom: 26px;
+    }
+    .mast__title { font-size: 32px; }
+    .mast__anchor { font-size: 26px; }
+    .mast__nav { flex-wrap: wrap; gap: 4px; }
+    .mast__nav a { padding: 6px 9px; font-size: 10px; }
+    .mast__nav__sep { display: none; }
+
+    .currents { grid-template-columns: 1fr 1fr; }
+    .currents__item:last-child { grid-column: 1 / -1; }
+
+    .post { padding: 20px 20px 18px; }
+    .post__title { font-size: 24px; }
+    .post__excerpt { font-size: 15px; }
+    .post--featured { padding: 24px 22px 20px; }
+    .post--featured .post__title { font-size: 28px; }
+    .post--featured .post__excerpt { font-size: 16px; }
+    .pull { font-size: 18px; padding-left: 12px; }
+    .post__foot { gap: 12px; }
+
+    .pager__btn { min-width: 32px; height: 32px; padding: 0 8px; font-size: 11px; }
+    .pager__arrow { padding: 0 10px; }
+  }
+</style>
+</head>
+<body>
+
+
+
+<main class="blog">
+
+  <!-- Masthead -->
+  <header class="mast">
+    <div>
+      <div class="mast__brand">
+        <span class="mast__anchor">✎</span>
+        <h1 class="mast__title">Field Notes</h1>
+      </div>
+      <div class="mast__sub">Slow thoughts on technology, AI, and the craft</div>
+    </div>
+    <nav class="mast__nav">
+      <a href="#" class="is-active">Latest</a>
+      <span class="mast__nav__sep"></span>
+      <a href="#">AI</a>
+      <a href="#">Tools</a>
+      <a href="#">Craft</a>
+      <a href="#">Misc.</a>
+    </nav>
+  </header>
+
+
+
+  <div class="section-rule">Latest notes</div>
+
+  <article class="post is-focused">
+    <div class="post__tags">
+      <span class="cat" data-tag="AI">AI</span>
+      <span class="cat" data-tag="Agents">Agents</span>
+      <span class="cat" data-tag="Essay">Essay</span>
+    </div>
+    <div class="post__meta">
+      <span>April 22, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>9 min read</span>
+    </div>
+
+    <a href="Personal Blog Post.html" class="post__title">Agents, quietly: why the next wave of AI will feel less like a chatbot</a>
+
+    <p class="post__excerpt">
+      Most "agentic" demos are still framed as a conversation that happens to
+      call tools. But the interesting work is invisible — models that plan,
+      retry, and narrate progress as a first-class citizen of the UI. A
+      short essay on ambient agents, and a few concrete patterns I've been
+      trying in my own projects.
+    </p>
+
+    <blockquote class="pull">"The best agents are the ones you stop noticing — they disappear into the work."</blockquote>
+
+    <div class="post__foot">
+      <span></span>
+      <a href="Personal Blog Post.html" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <article class="post">
+    <div class="post__tags">
+      <span class="cat" data-tag="Tools">Tools</span>
+      <span class="cat" data-tag="Craft">Craft</span>
+    </div>
+    <div class="post__meta">
+      <span>April 19, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>6 min read</span>
+    </div>
+    <a href="#" class="post__title">A small-tools kit I actually use: three years of editor tweaks</a>
+    <p class="post__excerpt">
+      The short list of plugins, keybindings, and shell aliases that have
+      earned their keep on my laptop. Not a productivity roundup — a
+      working catalog, annotated with the ones I've had to rip out.
+    </p>
+    <div class="post__foot">
+      <span></span>
+      <a href="#" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <article class="post">
+    <div class="post__tags">
+      <span class="cat" data-tag="Essay">Essay</span>
+      <span class="cat" data-tag="AI">AI</span>
+      <span class="cat" data-tag="Craft">Craft</span>
+    </div>
+    <div class="post__meta">
+      <span>April 15, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>11 min read</span>
+    </div>
+    <a href="#" class="post__title">The taste problem: why good models still produce forgettable work</a>
+    <p class="post__excerpt">
+      We've solved a lot of the "can it produce something coherent"
+      question. We haven't solved the "is this any good" question. A long
+      meander through taste, defaults, and the strange fact that every
+      generative tool slowly converges on the same aesthetic.
+    </p>
+    <div class="post__foot">
+      <span></span>
+      <a href="#" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <article class="post">
+    <div class="post__tags">
+      <span class="cat" data-tag="Notebook">Notebook</span>
+      <span class="cat" data-tag="AI">AI</span>
+      <span class="cat" data-tag="RAG">RAG</span>
+    </div>
+    <div class="post__meta">
+      <span>April 12, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>4 min read</span>
+    </div>
+    <a href="#" class="post__title">Notes on making a retrieval pipeline actually legible</a>
+    <p class="post__excerpt">
+      Most RAG stacks show you a single confidence number and call it a
+      day. Users don't want a number — they want a feel for <em>why</em>
+      the model said what it said. A few experiments in visualizing the
+      <em>shape</em> of a retrieval, from raw chunk strips to smoothed
+      attributions.
+    </p>
+    <div class="post__foot">
+      <span></span>
+      <a href="#" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <article class="post">
+    <div class="post__tags">
+      <span class="cat" data-tag="AI">AI</span>
+      <span class="cat" data-tag="Tools">Tools</span>
+      <span class="cat" data-tag="Notebook">Notebook</span>
+    </div>
+    <div class="post__meta">
+      <span>April 8, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>7 min read</span>
+    </div>
+    <a href="#" class="post__title">Why the pre-deploy calm is the most dangerous hour</a>
+    <p class="post__excerpt">
+      A quiet production graph under a thickening Slack thread has
+      shipped more bad releases than any red-alert dashboard. A field
+      guide to the signs: the glassy forward quadrant of your CI, the
+      wrong-direction error rates, the on-call's behavior.
+    </p>
+    <div class="post__foot">
+      <span></span>
+      <a href="#" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <article class="post">
+    <div class="post__tags">
+      <span class="cat" data-tag="Tools">Tools</span>
+      <span class="cat" data-tag="Craft">Craft</span>
+    </div>
+    <div class="post__meta">
+      <span>April 3, 2026</span>
+      <span class="post__meta__sep">·</span>
+      <span>5 min read</span>
+    </div>
+    <a href="#" class="post__title">A keyboard you can actually trust after eight hours</a>
+    <p class="post__excerpt">
+      Spec sheets don't tell you how a board behaves at 6pm on a
+      deadline day. A long-term test of three sub-$250 split keyboards
+      against a calibrated baseline: the one I've typed on for years.
+    </p>
+    <div class="post__foot">
+      <span></span>
+      <a href="#" class="post__cta">Continue reading</a>
+    </div>
+  </article>
+
+  <!-- Bottom pagination — chunky -->
+  <div class="pager__count">Page 1 of 9 · Showing notes 1–6</div>
+  <div class="pager" aria-label="Bottom pagination">
+    <a href="#" class="pager__btn pager__arrow is-disabled">← Newer</a>
+    <a href="#" class="pager__btn is-current">1</a>
+    <a href="#" class="pager__btn">2</a>
+    <a href="#" class="pager__btn">3</a>
+    <a href="#" class="pager__btn">4</a>
+    <span class="pager__dots">···</span>
+    <a href="#" class="pager__btn">9</a>
+    <a href="#" class="pager__btn pager__arrow">Older →</a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ftr">
+    <div>✎ Field Notes · a personal log</div>
+    <div>
+      <a href="#">About</a>
+      &nbsp;·&nbsp;
+      <a href="#">Archive</a>
+      &nbsp;·&nbsp;
+      <a href="#">RSS</a>
+    </div>
+  </footer>
+
+</main>
+
+
+<script>
+  // Mobile scroll-focus: light up the post whose center is nearest the viewport center.
+  (function () {
+    const mq = window.matchMedia('(max-width: 720px), (hover: none)');
+    const posts = Array.from(document.querySelectorAll('.post'));
+    if (!posts.length) return;
+
+    let raf = 0;
+    let focused = null;
+
+    function clear() {
+      if (focused) { focused.classList.remove('is-focused'); focused = null; }
+    }
+
+    function update() {
+      raf = 0;
+      if (!mq.matches) { clear(); return; }
+      const mid = window.innerHeight / 2;
+      let best = null, bestDist = Infinity;
+      for (const p of posts) {
+        const r = p.getBoundingClientRect();
+        // Skip posts entirely off-screen
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        const center = r.top + r.height / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) { bestDist = dist; best = p; }
+      }
+      if (best !== focused) {
+        clear();
+        if (best) { best.classList.add('is-focused'); focused = best; }
+      }
+    }
+
+    function schedule() {
+      if (!raf) raf = requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    mq.addEventListener?.('change', schedule);
+    // Initial pass
+    schedule();
+  })();
+</script>
+
+</body>
+</html>

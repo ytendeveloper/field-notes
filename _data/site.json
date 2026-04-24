@@ -1,0 +1,16 @@
+{
+  "title": "Field Notes",
+  "subtitle": "Slow thoughts on technology, AI, and the craft",
+  "baseUrl": "https://ytendeveloper.github.io/field-notes",
+  "author": {
+    "name": "Ravi",
+    "email": ""
+  },
+  "nav": [
+    { "label": "AI",    "href": "#" },
+    { "label": "Tools", "href": "#" },
+    { "label": "Craft", "href": "#" },
+    { "label": "Misc.", "href": "#" }
+  ],
+  "postsPerPage": 6
+}

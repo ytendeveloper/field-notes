@@ -1,0 +1,9 @@
+{
+  "AI":       "var(--accent)",
+  "Agents":   "#8a5a2b",
+  "RAG":      "#6b4f8a",
+  "Tools":    "var(--blue)",
+  "Craft":    "#3d7a4a",
+  "Essay":    "var(--ink)",
+  "Notebook": "var(--muted)"
+}

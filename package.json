@@ -1,0 +1,19 @@
+{
+  "name": "field-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Field Notes — personal blog, static site, generated with Eleventy.",
+  "scripts": {
+    "new": "node scripts/new-post.js",
+    "dev": "ELEVENTY_ENV=dev eleventy --serve",
+    "build": "eleventy",
+    "deploy": "npm run build && gh-pages -d site -b gh-pages"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "gh-pages": "^6.3.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-container": "^4.0.0",
+    "markdown-it-image-figures": "^2.1.1"
+  }
+}

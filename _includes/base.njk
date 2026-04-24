@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{{ site.title }}{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ '/assets/design-theme.css' | url }}">
+<style>
+  /* Base tag-pill style (applied everywhere .cat is used) */
+  .cat {
+    --tag-color: var(--ink);
+    display: inline-block;
+    background: var(--paper);
+    border: 1px solid var(--tag-color);
+    color: var(--tag-color);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  /* Data-driven per-tag colors (see _data/tagStyles.json) */
+  {% for name, color in tagStyles %}
+  .cat[data-tag="{{ name }}"] { --tag-color: {{ color }}; }
+  {% endfor %}
+</style>
+{% block styles %}{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

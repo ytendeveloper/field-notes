@@ -1,0 +1,532 @@
+{% extends "base.njk" %}
+
+{% block title %}{{ title }} — {{ site.title }}{% endblock %}
+
+{% block styles %}
+<style>
+  /* ══════════ Layout ══════════ */
+  .page {
+    max-width: 920px; margin: 0 auto;
+    padding: 48px 32px 120px;
+    position: relative;
+  }
+
+  /* ══════════ Masthead ══════════ */
+  .mast {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px;
+    border-bottom: 1.5px solid var(--line-strong);
+    margin-bottom: 40px;
+  }
+  .mast__brand { display: flex; align-items: flex-end; gap: 14px; }
+  .mast__anchor { font-size: 32px; line-height: 1; color: var(--accent); }
+  .mast__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 42px; line-height: 1; letter-spacing: -1px; color: var(--ink);
+  }
+  .mast__sub {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .mast__nav { display: flex; align-items: center; gap: 8px; }
+  .mast__nav a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 8px 12px; text-decoration: none; border-radius: 4px;
+  }
+  .mast__nav a:hover { background: rgba(26,26,26,0.06); }
+  .mast__nav a.is-active { background: var(--ink); color: var(--paper); }
+  .mast__nav__sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
+
+  /* ══════════ Back link ══════════ */
+  .back {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase; text-decoration: none;
+    margin-bottom: 28px;
+  }
+  .back:hover { color: var(--accent); }
+  .back::before { content: '←'; font-family: var(--font-display); font-size: 16px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ══════════ Hero ══════════ */
+  .hero { margin-bottom: 40px; }
+  .hero .tags { margin-bottom: 18px; }
+  .hero__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 52px; line-height: 1.05; letter-spacing: -1.5px;
+    color: var(--accent);
+    margin: 0 0 18px; text-wrap: balance;
+  }
+  .hero__deck {
+    font-family: var(--font-display); font-size: 20px; line-height: 1.4;
+    color: var(--ink); margin: 0 0 22px;
+    max-width: 58ch; text-wrap: pretty;
+    opacity: 0.9;
+  }
+  .hero__meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line-dashed);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .hero__meta__sep { opacity: 0.5; }
+
+  /* ══════════ Two-column: prose + sidebar ══════════ */
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ══════════ Prose ══════════ */
+  .prose {
+    font-family: var(--font-display);
+    font-size: 18px; line-height: 1.65; color: var(--ink);
+    max-width: 62ch;
+  }
+  .prose > :first-child { margin-top: 0; }
+  .prose > :last-child  { margin-bottom: 0; }
+  .prose p { margin: 0 0 1.2em; text-wrap: pretty; }
+  .prose h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.4px;
+    color: var(--ink);
+    margin: 2em 0 0.5em;
+    position: relative;
+    padding-left: 0;
+  }
+  .prose h2::before {
+    content: counter(h2-count, decimal-leading-zero);
+    counter-increment: h2-count;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .prose { counter-reset: h2-count; }
+  .prose h3 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 20px; line-height: 1.2;
+    color: var(--ink);
+    margin: 1.8em 0 0.4em;
+  }
+  .prose a {
+    color: var(--blue); text-decoration: underline dotted;
+    text-underline-offset: 4px;
+  }
+  .prose a:hover { color: var(--accent); text-decoration-style: solid; }
+  .prose strong { font-weight: 700; color: var(--ink); }
+  .prose em { font-style: italic; }
+  .prose code {
+    font-family: var(--font-mono); font-size: 0.92em;
+    background: rgba(26,26,26,0.06);
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--ink);
+  }
+  .prose pre {
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.55;
+    background: var(--ink); color: var(--paper);
+    padding: 18px 20px; border-radius: var(--r-md);
+    margin: 1.5em 0; overflow-x: auto;
+    white-space: pre;
+  }
+  .prose pre code { background: transparent; padding: 0; color: inherit; }
+  .prose ul, .prose ol { margin: 0 0 1.2em; padding-left: 1.4em; }
+  .prose ul li { list-style: none; position: relative; }
+  .prose ul li::before {
+    content: '·'; position: absolute; left: -1em;
+    color: var(--accent); font-weight: 700; font-size: 1.5em; line-height: 1;
+  }
+  .prose ol li { padding-left: 4px; }
+  .prose li { margin-bottom: 0.4em; }
+
+  /* Drop cap on first paragraph */
+  .prose > p:first-of-type::first-letter {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 64px; line-height: 0.85;
+    float: left; color: var(--accent);
+    padding: 8px 10px 0 0;
+    margin-top: 4px;
+  }
+
+  /* Pull-quote */
+  .prose .pull {
+    border-left: 3px solid var(--accent);
+    padding: 6px 0 6px 20px;
+    margin: 1.8em 0;
+    font-family: var(--font-script);
+    font-weight: 400;
+    font-size: 26px; line-height: 1.3; color: var(--ink);
+    max-width: 50ch;
+  }
+  /* markdown-it wraps ::: pull body in <p> — kill its margin */
+  .prose .pull p { margin: 0; }
+
+  /* Figure */
+  .prose figure {
+    margin: 2em 0; padding: 0;
+  }
+  .prose figure img {
+    display: block;
+    width: 100%;
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--line);
+  }
+  .prose figure .ph {
+    background: var(--cool);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--r-md);
+    aspect-ratio: 16 / 9;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .prose figcaption {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.2px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 10px; padding-left: 12px;
+    border-left: 2px solid var(--line-soft);
+  }
+
+  /* Callout box */
+  .callout {
+    background: var(--warm);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    margin: 1.8em 0;
+    font-size: 16px;
+  }
+  .callout__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .callout p { margin: 0; }
+  .callout p + p { margin-top: 0.6em; }
+
+  /* ══════════ TOC sidebar ══════════ */
+  .toc {
+    position: sticky; top: 40px;
+    border-left: 1.5px solid var(--line);
+    padding: 4px 0 4px 18px;
+  }
+  .toc__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .toc ol {
+    list-style: none; padding: 0; margin: 0;
+    counter-reset: toc;
+  }
+  .toc li { margin-bottom: 10px; counter-increment: toc; }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.3px;
+    color: var(--muted);
+    margin-right: 8px;
+  }
+  .toc a {
+    font-family: var(--font-display); font-size: 14px; line-height: 1.25;
+    color: var(--ink); text-decoration: none;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc__read {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px dashed var(--line-dashed);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.3px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .toc__read b { font-weight: 400; color: var(--accent); }
+  .toc__progress {
+    height: 3px; background: var(--line-soft); border-radius: 2px;
+    margin-top: 8px; overflow: hidden;
+  }
+  .toc__progress__fill {
+    height: 100%; background: var(--accent); width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ══════════ End-of-post ══════════ */
+  .endmark {
+    text-align: center;
+    font-family: var(--font-script);
+    font-size: 32px; color: var(--accent);
+    margin: 2.5em 0;
+    letter-spacing: 0.5em;
+  }
+
+  .post-end {
+    margin-top: 48px; padding-top: 28px;
+    border-top: 1px dashed var(--line-dashed);
+  }
+  .post-end__row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 18px; margin-bottom: 14px;
+  }
+  .post-end__stamp {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.3px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .post-end__stamp b { color: var(--ink); font-weight: 400; }
+  .share { display: flex; gap: 6px; align-items: center; }
+  .share__btn {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 6px 12px; border: 1px solid var(--line);
+    border-radius: 4px; background: var(--paper);
+    cursor: pointer; text-decoration: none;
+  }
+  .share__btn:hover { border-color: var(--ink); background: rgba(26,26,26,0.04); }
+  .share__btn--primary {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .share__btn--primary:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ══════════ Prev / Next ══════════ */
+  .nextprev {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-top: 36px;
+  }
+  .nextprev a, .nextprev div.nextprev__stub {
+    display: block; padding: 18px 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--paper);
+    text-decoration: none;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .nextprev a:hover {
+    background: var(--warm);
+    border: 2.2px solid var(--accent);
+    padding: calc(18px - 1.2px) calc(20px - 1.2px);
+  }
+  .nextprev div.nextprev__stub { opacity: 0.6; }
+  .nextprev__lbl {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .nextprev__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 18px; line-height: 1.2; color: var(--ink);
+  }
+  .nextprev a:hover .nextprev__title { color: var(--accent); }
+  .nextprev__next { text-align: right; }
+
+  /* ══════════ Footer ══════════ */
+  .ftr {
+    margin-top: 48px; padding-top: 22px;
+    border-top: 1px dashed var(--line-dashed);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .ftr a { color: var(--blue); text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* ══════════ Responsive ══════════ */
+  @media (max-width: 820px) {
+    .body { grid-template-columns: 1fr; gap: 0; }
+    .toc {
+      position: static;
+      border-left: 0;
+      border-top: 1px dashed var(--line-dashed);
+      border-bottom: 1px dashed var(--line-dashed);
+      margin-top: 20px;
+      padding: 16px 0 18px;
+    }
+    .toc ol {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .page { padding: 24px 16px 100px; }
+    .mast {
+      flex-direction: column; align-items: flex-start; gap: 14px;
+      padding-bottom: 16px; margin-bottom: 24px;
+    }
+    .mast__title { font-size: 32px; }
+    .mast__anchor { font-size: 26px; }
+    .mast__nav { flex-wrap: wrap; gap: 4px; }
+    .mast__nav a { padding: 6px 9px; font-size: 10px; }
+    .mast__nav__sep { display: none; }
+
+    .hero__title { font-size: 34px; letter-spacing: -1px; }
+    .hero__deck  { font-size: 17px; }
+    .hero__meta  { font-size: 10px; gap: 10px; }
+
+    .prose { font-size: 17px; }
+    .prose h2 { font-size: 22px; }
+    .prose h3 { font-size: 18px; }
+    .prose > p:first-of-type::first-letter { font-size: 48px; padding: 6px 8px 0 0; }
+    .prose .pull { font-size: 22px; padding-left: 14px; }
+
+    .nextprev { grid-template-columns: 1fr; }
+    .toc ol { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+{% set toc = content | extractToc %}
+{% set older = page.url | olderPost(collections.posts) %}
+{% set newer = page.url | newerPost(collections.posts) %}
+{% set number = page.url | postNumber(collections.posts) %}
+{% set wc = content | wordCount %}
+
+<main class="page">
+
+  <!-- Masthead -->
+  <header class="mast">
+    <div>
+      <div class="mast__brand">
+        <span class="mast__anchor">✎</span>
+        <h1 class="mast__title">{{ site.title }}</h1>
+      </div>
+      <div class="mast__sub">{{ site.subtitle }}</div>
+    </div>
+    <nav class="mast__nav">
+      <a href="{{ '/' | url }}">Latest</a>
+      <span class="mast__nav__sep"></span>
+      {% for n in site.nav %}<a href="{{ n.href }}">{{ n.label }}</a>{% endfor %}
+    </nav>
+  </header>
+
+  <!-- Back link -->
+  <a href="{{ '/' | url }}" class="back">All notes</a>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="tags">
+      {% for t in tags %}<span class="cat" data-tag="{{ t }}">{{ t }}</span>{% endfor %}
+    </div>
+
+    <h1 class="hero__title">{{ title }}</h1>
+
+    {% if deck %}<p class="hero__deck">{{ deck }}</p>{% endif %}
+
+    <div class="hero__meta">
+      <span>{{ date | formatDate }}</span>
+      <span class="hero__meta__sep">·</span>
+      <span>{{ content | readTime }}</span>
+      <span class="hero__meta__sep">·</span>
+      <span>~{{ wc }} words</span>
+      {% if number %}<span class="hero__meta__sep">·</span>
+      <span>No. {{ number }}</span>{% endif %}
+    </div>
+  </div>
+
+  <!-- Body + TOC -->
+  <div class="body">
+    <article class="prose">
+      {{ content | safe }}
+    </article>
+
+    {% if toc | length %}
+    <aside class="toc" aria-label="Table of contents">
+      <div class="toc__lbl">In this note</div>
+      <ol>
+        {% for h in toc %}<li><a href="#{{ h.id }}">{{ h.title }}</a></li>{% endfor %}
+      </ol>
+      <div class="toc__read">
+        Reading · <b id="toc-pct">0%</b>
+        <div class="toc__progress"><div class="toc__progress__fill" id="toc-fill"></div></div>
+      </div>
+    </aside>
+    {% endif %}
+  </div>
+
+  <!-- End mark -->
+  <div class="endmark">· · ·</div>
+
+  <!-- End-of-post -->
+  <div class="post-end">
+    <div class="post-end__row">
+      <div class="tags">
+        {% for t in tags %}<span class="cat" data-tag="{{ t }}">{{ t }}</span>{% endfor %}
+      </div>
+      <div class="share">
+        <button class="share__btn" type="button" onclick="navigator.clipboard.writeText(location.href)">Copy link</button>
+        <a href="mailto:?subject={{ title | urlencode }}&body={{ site.baseUrl }}{{ page.url }}" class="share__btn">Email</a>
+        {% if site.author.email %}<a href="mailto:{{ site.author.email }}?subject=Re:%20{{ title | urlencode }}" class="share__btn share__btn--primary">Reply by email</a>{% endif %}
+      </div>
+    </div>
+    <div class="post-end__stamp">
+      Published <b>{{ date | formatDate }}</b>
+      {% if edited %} · Last edited <b>{{ edited | formatDate }}</b>{% endif %}
+      {% if number %} · <b>No. {{ number }}</b>{% endif %}
+    </div>
+  </div>
+
+  <!-- Prev / Next -->
+  <div class="nextprev">
+    {% if older %}
+    <a href="{{ older.url | url }}">
+      <div class="nextprev__lbl">← Older note</div>
+      <div class="nextprev__title">{{ older.data.title }}</div>
+    </a>
+    {% else %}
+    <div class="nextprev__stub">
+      <div class="nextprev__lbl">← Older note</div>
+      <div class="nextprev__title">This is the first note.</div>
+    </div>
+    {% endif %}
+
+    {% if newer %}
+    <a href="{{ newer.url | url }}" class="nextprev__next">
+      <div class="nextprev__lbl">Newer note →</div>
+      <div class="nextprev__title">{{ newer.data.title }}</div>
+    </a>
+    {% else %}
+    <div class="nextprev__stub nextprev__next">
+      <div class="nextprev__lbl">Newer note →</div>
+      <div class="nextprev__title">Coming soon</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Footer -->
+  <footer class="ftr">
+    <div>✎ {{ site.title }} · a personal log</div>
+    <div>
+      <a href="{{ '/' | url }}">All notes</a>
+      &nbsp;·&nbsp;
+      <a href="#">RSS</a>
+    </div>
+  </footer>
+
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Reading-progress bar in the TOC
+  (function () {
+    const fill = document.getElementById('toc-fill');
+    const pct  = document.getElementById('toc-pct');
+    const article = document.querySelector('.prose');
+    if (!fill || !article) return;
+
+    function update() {
+      const r = article.getBoundingClientRect();
+      const total = article.offsetHeight;
+      const scrolled = Math.max(0, Math.min(total, -r.top + window.innerHeight * 0.15));
+      const p = Math.round((scrolled / total) * 100);
+      const clamped = Math.max(0, Math.min(100, p));
+      fill.style.width = clamped + '%';
+      pct.textContent = clamped + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+</script>
+{% endblock %}

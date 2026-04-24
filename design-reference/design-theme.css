@@ -1,0 +1,270 @@
+/* ================================================================
+   nautiNAIDOO — Sailor Weather Design Theme
+   Canonical tokens & components. Import on every page.
+   ================================================================ */
+
+/* ── Fonts ──────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Caveat:wght@400;700&family=Special+Elite&display=swap');
+
+:root {
+  /* ── Color ──────────────────────────────────────────────── */
+  --ink:     #1a1a1a;   /* primary text */
+  --muted:   #6b6b6b;   /* secondary text, labels */
+  --paper:   #f7f4ec;   /* default bg */
+  --warm:    #fbf5e3;   /* accented card bg (today/featured) */
+  --cool:    #e9f0f2;   /* alt card bg */
+  --past:    #ece8df;   /* muted past-state bg */
+  --accent:  #c54b2d;   /* brick — highlights, warnings, gusts */
+  --blue:    #3a6e7a;   /* muted teal — secondary, rain, cold */
+
+  /* state variants */
+  --line:          rgba(26, 26, 26, 0.22);  /* standard border */
+  --line-strong:   rgba(26, 26, 26, 0.35);
+  --line-dashed:   rgba(26, 26, 26, 0.25);
+  --line-soft:     rgba(26, 26, 26, 0.12);
+  --line-faint:    rgba(26, 26, 26, 0.08);
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-display: "Kalam", "Caveat", "Comic Sans MS", cursive;
+  --font-script:  "Caveat", "Kalam", cursive;
+  --font-mono:    "Special Elite", "Courier New", monospace;
+  --font-body:    var(--font-display);
+
+  /* Type scale */
+  --fs-display:   54px;
+  --fs-h1:        32px;
+  --fs-h2:        24px;
+  --fs-h3:        20px;
+  --fs-body:      16px;
+  --fs-small:     14px;
+  --fs-label:     11px;   /* mono labels, all caps */
+  --fs-tiny:      10px;
+
+  /* Line heights */
+  --lh-tight:     1.05;
+  --lh-normal:    1.35;
+
+  /* Letter-spacing for mono labels */
+  --ls-label:     1.4px;
+  --ls-large:     -0.5px;
+
+  /* ── Spacing ────────────────────────────────────────────── */
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:   12px;
+  --sp-4:   16px;
+  --sp-5:   20px;
+  --sp-6:   24px;
+  --sp-8:   32px;
+  --sp-10:  40px;
+
+  /* ── Radius ─────────────────────────────────────────────── */
+  --r-sm:  4px;
+  --r-md:  8px;
+  --r-lg:  14px;
+  --r-xl:  18px;
+
+  /* ── Stroke weights ─────────────────────────────────────── */
+  --stroke-thin:    0.7px;
+  --stroke:         1px;
+  --stroke-medium:  1.4px;
+  --stroke-bold:    2.2px;
+}
+
+/* ── Global baseline ──────────────────────────────────────── */
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Typography classes ───────────────────────────────────── */
+.t-display { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: var(--lh-tight); letter-spacing: -1.5px; color: var(--accent); }
+.t-h1      { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h1); line-height: var(--lh-tight); letter-spacing: var(--ls-large); }
+.t-h2      { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2); line-height: var(--lh-tight); }
+.t-h3      { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); line-height: var(--lh-tight); }
+.t-body    { font-family: var(--font-display); font-size: var(--fs-body); line-height: var(--lh-normal); }
+.t-small   { font-family: var(--font-display); font-size: var(--fs-small); color: var(--muted); }
+.t-script  { font-family: var(--font-script); font-weight: 400; }
+
+.t-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.t-tiny {
+  font-family: var(--font-mono);
+  font-size: var(--fs-tiny);
+  letter-spacing: 1.3px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.t-mono   { font-family: var(--font-mono); }
+.t-accent { color: var(--accent); }
+.t-blue   { color: var(--blue); }
+.t-muted  { color: var(--muted); }
+
+/* ── Components ──────────────────────────────────────────── */
+
+/* Card — base container with hand-drawn border */
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4);
+  overflow: hidden;
+}
+.card--today {
+  background: var(--warm);
+  border: 2.2px solid var(--accent);
+}
+.card--past {
+  background: var(--past);
+  opacity: 0.72;
+}
+.card--flush { padding: 0; }
+
+/* Sub-section — inner bordered area with label on the top border */
+.sub {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-4) var(--sp-2) var(--sp-2);
+  margin: var(--sp-5) var(--sp-3) var(--sp-2);
+}
+.sub__label {
+  position: absolute;
+  top: -8px; left: var(--sp-4);
+  padding: 0 6px;
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: var(--fs-tiny);
+  letter-spacing: var(--ls-label);
+  color: var(--ink);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.card--today .sub__label { background: var(--warm); color: var(--accent); }
+
+/* Divider — dashed hand-drawn style */
+.divider {
+  border: 0;
+  border-top: 1px dashed var(--line-dashed);
+  margin: var(--sp-3) 0;
+}
+
+/* Button / toggle */
+.btn-group {
+  display: inline-flex;
+  border: 1.2px solid var(--ink);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.btn-group > button {
+  background: transparent;
+  border: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--ink);
+  padding: 6px 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.btn-group > button.is-on { background: var(--ink); color: var(--paper); }
+.btn-group > button:hover:not(.is-on) { background: rgba(26,26,26,0.06); }
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  padding: 10px 20px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn--primary { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.btn--ghost   { background: transparent; border-color: var(--ink); }
+
+/* Badge / pill */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-tiny);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  white-space: nowrap;
+}
+.badge--accent { border-color: var(--accent); color: var(--accent); }
+.badge--blue   { border-color: var(--blue);   color: var(--blue); }
+.badge--filled { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* Stat block — label above big number + unit */
+.stat { text-align: right; }
+.stat__label { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.1px; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.stat__row   { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; margin-top: 2px; white-space: nowrap; }
+.stat__num   { font-family: var(--font-display); font-weight: 700; line-height: 1; white-space: nowrap; }
+.stat__unit  { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+/* App-shell layout — fixed header + scrollable body */
+.app-shell {
+  max-width: 1200px; margin: 0 auto;
+  height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column;
+  padding: 0 var(--sp-6);
+}
+.app-shell__header {
+  flex-shrink: 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--sp-6); padding: var(--sp-8) var(--sp-2) var(--sp-5);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--paper);
+  z-index: 2;
+}
+.app-shell__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--sp-4) 2px var(--sp-8);
+  scroll-behavior: smooth;
+}
+.app-shell__body::-webkit-scrollbar { width: 8px; }
+.app-shell__body::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.18); border-radius: 4px; }
+
+/* Hand-drawn sketch filter — attach to SVGs via filter="url(#rough)" or filter="url(#roughBig)" */
+/* The SVG <defs> live in weather-data.jsx's SketchDefs component; reuse everywhere. */
+
+/* ── Mobile adjustments ──────────────────────────────────── */
+@media (max-width: 640px) {
+  :root {
+    --fs-display: 38px;
+    --fs-h1: 22px;
+    --fs-h2: 20px;
+    --fs-h3: 17px;
+  }
+  .app-shell { padding: 0 var(--sp-3); }
+  .app-shell__header {
+    padding: var(--sp-5) var(--sp-1) var(--sp-3);
+    gap: var(--sp-3);
+  }
+  .app-shell__body { padding: var(--sp-3) 0 var(--sp-5); }
+  .card { padding: var(--sp-3); }
+  .sub { margin: var(--sp-4) var(--sp-2) var(--sp-1); padding: var(--sp-3) var(--sp-1) var(--sp-1); }
+}

@@ -1,0 +1,362 @@
+---
+pagination:
+  data: collections.posts
+  size: 6
+  alias: postsOnPage
+  reverse: true
+permalink: "{% if pagination.pageNumber > 0 %}/page/{{ pagination.pageNumber + 1 }}/{% else %}/{% endif %}"
+---
+{% extends "base.njk" %}
+
+{% block title %}{{ site.title }}{% endblock %}
+
+{% block styles %}
+<style>
+  /* ── Page scaffold ─────────────────────────────────────── */
+  .blog {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+    position: relative;
+  }
+
+  /* ── Masthead ──────────────────────────────────────────── */
+  .mast {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px;
+    border-bottom: 1.5px solid var(--line-strong);
+    margin-bottom: 40px;
+  }
+  .mast__brand { display: flex; align-items: flex-end; gap: 14px; }
+  .mast__anchor { font-size: 32px; line-height: 1; color: var(--accent); }
+  .mast__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 42px; line-height: 1; letter-spacing: -1px;
+    color: var(--ink);
+  }
+  .mast__sub {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .mast__nav { display: flex; align-items: center; gap: 8px; }
+  .mast__nav a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--ink); text-transform: uppercase;
+    padding: 8px 12px; text-decoration: none; border-radius: 4px;
+  }
+  .mast__nav a:hover { background: rgba(26,26,26,0.06); }
+  .mast__nav a.is-active { background: var(--ink); color: var(--paper); }
+  .mast__nav__sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
+
+  /* ── Section line ──────────────────────────────────────── */
+  .section-rule {
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--muted); text-transform: uppercase;
+    margin: 6px 0 20px;
+  }
+  .section-rule::before,
+  .section-rule::after {
+    content: ''; flex: 1; border-top: 1px dashed var(--line-dashed);
+  }
+
+  /* ── Post card ─────────────────────────────────────────── */
+  .post {
+    background: var(--paper);
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-lg);
+    padding: 28px 32px 24px;
+    margin-bottom: 22px;
+    position: relative;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  /* DESKTOP: hover highlights; first post is highlighted when nothing is hovered */
+  @media (hover: hover) and (min-width: 721px) {
+    .post:hover,
+    .blog:not(:has(.post:hover)) .post:first-of-type {
+      background: var(--warm);
+      border: 2.2px solid var(--accent);
+      padding: calc(28px - 0.7px) calc(32px - 0.7px) calc(24px - 0.7px);
+    }
+    .post:hover .post__title,
+    .blog:not(:has(.post:hover)) .post:first-of-type .post__title { color: var(--accent); }
+  }
+
+  /* MOBILE / TOUCH: JS-managed .is-focused carries the highlight */
+  @media (hover: none), (max-width: 720px) {
+    .post.is-focused {
+      background: var(--warm);
+      border: 2.2px solid var(--accent);
+      padding: calc(28px - 0.7px) calc(32px - 0.7px) calc(24px - 0.7px);
+    }
+    .post.is-focused .post__title { color: var(--accent); }
+  }
+
+  .post__meta {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .post__meta__sep { opacity: 0.5; }
+
+  .post__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 30px; line-height: 1.1; letter-spacing: -0.6px;
+    color: var(--ink); margin: 0 0 10px;
+    text-decoration: none; display: inline-block;
+  }
+  .post__title:hover { color: var(--accent); }
+
+  .post__excerpt {
+    font-family: var(--font-display); font-size: 16px; line-height: 1.55;
+    color: var(--ink); margin: 0 0 18px; max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .post__foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line-dashed);
+  }
+  .post__cta {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.6px;
+    color: var(--accent); text-transform: uppercase; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .post__cta::after { content: '→'; font-family: var(--font-display); font-size: 16px; }
+  .post__cta:hover { text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* Pull-quote inside first post card on page 1 */
+  .pull {
+    border-left: 3px solid var(--accent);
+    padding: 2px 0 2px 16px;
+    margin: 18px 0 20px;
+    font-family: var(--font-script);
+    font-size: 22px; line-height: 1.25; color: var(--ink);
+    max-width: 50ch;
+  }
+
+  /* Stack of tag pills — sits at the top of a post */
+  .post__tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  /* Hover/focus: fill pill with its tag color, text flips to paper */
+  .post:hover .cat,
+  .post.is-focused .cat {
+    background: var(--tag-color);
+    color: var(--paper);
+  }
+
+  /* ── Pagination ────────────────────────────────────────── */
+  .pager {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin: 30px 0 18px;
+    flex-wrap: wrap;
+  }
+  .pager__btn {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 1.4px;
+    color: var(--ink); text-decoration: none; text-transform: uppercase;
+    min-width: 36px; height: 36px; padding: 0 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.2px solid var(--line);
+    border-radius: var(--r-sm); background: var(--paper);
+    cursor: pointer;
+  }
+  .pager__btn:hover { border-color: var(--ink); }
+  .pager__btn.is-current {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .pager__btn.is-disabled { opacity: 0.35; pointer-events: none; }
+  .pager__arrow { padding: 0 14px; gap: 6px; }
+  .pager__dots { font-family: var(--font-mono); color: var(--muted); padding: 0 4px; }
+  .pager__count {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase; text-align: center;
+    margin-bottom: 18px;
+  }
+
+  /* ── Footer ────────────────────────────────────────────── */
+  .ftr {
+    margin-top: 48px; padding-top: 22px;
+    border-top: 1px dashed var(--line-dashed);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .ftr a { color: var(--blue); text-decoration: underline dotted; text-underline-offset: 4px; }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .blog { padding: 24px 16px 100px; }
+    .mast {
+      flex-direction: column; align-items: flex-start; gap: 14px;
+      padding-bottom: 16px; margin-bottom: 26px;
+    }
+    .mast__title { font-size: 32px; }
+    .mast__anchor { font-size: 26px; }
+    .mast__nav { flex-wrap: wrap; gap: 4px; }
+    .mast__nav a { padding: 6px 9px; font-size: 10px; }
+    .mast__nav__sep { display: none; }
+
+    .post { padding: 20px 20px 18px; }
+    .post__title { font-size: 24px; }
+    .post__excerpt { font-size: 15px; }
+    .pull { font-size: 18px; padding-left: 12px; }
+    .post__foot { gap: 12px; }
+
+    .pager__btn { min-width: 32px; height: 32px; padding: 0 8px; font-size: 11px; }
+    .pager__arrow { padding: 0 10px; }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+{% set totalPages = pagination.pages | length %}
+{% set currentPage = pagination.pageNumber + 1 %}
+{% set totalPosts = collections.posts | length %}
+{% set firstOnPage = pagination.pageNumber * site.postsPerPage + 1 %}
+{% set lastOnPage = firstOnPage + postsOnPage.length - 1 %}
+
+<main class="blog">
+
+  <!-- Masthead -->
+  <header class="mast">
+    <div>
+      <div class="mast__brand">
+        <span class="mast__anchor">✎</span>
+        <h1 class="mast__title">{{ site.title }}</h1>
+      </div>
+      <div class="mast__sub">{{ site.subtitle }}</div>
+    </div>
+    <nav class="mast__nav">
+      <a href="{{ '/' | url }}" class="is-active">Latest</a>
+      <span class="mast__nav__sep"></span>
+      {% for n in site.nav %}<a href="{{ n.href }}">{{ n.label }}</a>{% endfor %}
+    </nav>
+  </header>
+
+  <div class="section-rule">Latest notes</div>
+
+  {% for post in postsOnPage %}
+    {% set isFirstOnFirstPage = (loop.index == 1 and pagination.pageNumber == 0) %}
+    <article class="post{% if isFirstOnFirstPage %} is-focused{% endif %}">
+      {% if post.data.tags %}
+      <div class="post__tags">
+        {% for t in post.data.tags %}<span class="cat" data-tag="{{ t }}">{{ t }}</span>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="post__meta">
+        <span>{{ post.date | formatDate }}</span>
+        <span class="post__meta__sep">·</span>
+        <span>{{ post.templateContent | readTime }}</span>
+      </div>
+
+      <a href="{{ post.url | url }}" class="post__title">{{ post.data.title }}</a>
+
+      {% if post.data.deck %}
+      <p class="post__excerpt">{{ post.data.deck }}</p>
+      {% endif %}
+
+      {% if isFirstOnFirstPage and post.data.pull %}
+      <blockquote class="pull">{{ post.data.pull }}</blockquote>
+      {% endif %}
+
+      <div class="post__foot">
+        <span></span>
+        <a href="{{ post.url | url }}" class="post__cta">Continue reading</a>
+      </div>
+    </article>
+  {% endfor %}
+
+  {% if totalPosts == 0 %}
+    <div class="post">
+      <p class="post__excerpt">No notes yet. Start one with <code>npm run new "Title"</code>.</p>
+    </div>
+  {% endif %}
+
+  {% if totalPages > 1 %}
+  <div class="pager__count">Page {{ currentPage }} of {{ totalPages }} · Showing notes {{ firstOnPage }}–{{ lastOnPage }}</div>
+  <div class="pager" aria-label="Bottom pagination">
+    {% if pagination.href.previous %}
+      <a href="{{ pagination.href.previous | url }}" class="pager__btn pager__arrow">← Newer</a>
+    {% else %}
+      <span class="pager__btn pager__arrow is-disabled">← Newer</span>
+    {% endif %}
+    {% for href in pagination.hrefs %}
+      <a href="{{ href | url }}" class="pager__btn{% if loop.index0 == pagination.pageNumber %} is-current{% endif %}">{{ loop.index }}</a>
+    {% endfor %}
+    {% if pagination.href.next %}
+      <a href="{{ pagination.href.next | url }}" class="pager__btn pager__arrow">Older →</a>
+    {% else %}
+      <span class="pager__btn pager__arrow is-disabled">Older →</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <footer class="ftr">
+    <div>✎ {{ site.title }} · a personal log</div>
+    <div>
+      <a href="#">About</a>
+      &nbsp;·&nbsp;
+      <a href="#">Archive</a>
+      &nbsp;·&nbsp;
+      <a href="#">RSS</a>
+    </div>
+  </footer>
+
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Mobile scroll-focus: light up the post whose center is nearest the viewport center.
+  (function () {
+    const mq = window.matchMedia('(max-width: 720px), (hover: none)');
+    const posts = Array.from(document.querySelectorAll('.post'));
+    if (!posts.length) return;
+
+    let raf = 0;
+    let focused = null;
+
+    function clear() {
+      if (focused) { focused.classList.remove('is-focused'); focused = null; }
+    }
+
+    function update() {
+      raf = 0;
+      if (!mq.matches) { clear(); return; }
+      const mid = window.innerHeight / 2;
+      let best = null, bestDist = Infinity;
+      for (const p of posts) {
+        const r = p.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        const center = r.top + r.height / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) { bestDist = dist; best = p; }
+      }
+      if (best !== focused) {
+        clear();
+        if (best) { best.classList.add('is-focused'); focused = best; }
+      }
+    }
+
+    function schedule() {
+      if (!raf) raf = requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    mq.addEventListener?.('change', schedule);
+    schedule();
+  })();
+</script>
+{% endblock %}
